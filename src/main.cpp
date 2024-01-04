@@ -123,7 +123,7 @@ void usercontrol(void) {
   int lastSwitchTime = 0; //Backwards Switch time
   int lastPneumaticTime = 0; //Pneumatic switch time
   int lastCataBtnTime = 0; //last time cata button was pressed
-  int cataMaxWaitTime = 1500; //1.5 seconds
+  int cataMaxWaitTime = 3000; //3 seconds
   int cataWaitTime = 0;
 
   while (1) {
@@ -163,32 +163,37 @@ void usercontrol(void) {
     }
 
     //Automatic Firing of catapult
-    if(Controller1.ButtonL1.pressing()) {
+    if(Controller1.ButtonL1.pressing() && lastCataBtnTime > minSwitchTime) {
       lastCataBtnTime = 0;
+      cataWaitTime = 0;
       automaticFiring = !automaticFiring; //false --> true, true --> false
     }
 
-    //No matter what, prime the catapult
-    if(cata_switch.LOW) {
-      cataWaitTime = 0;
-      left_cata_motor.setVelocity(100, percent);
-      right_cata_motor.setVelocity(100, percent);
-    }
+    //Debug to display the value of the automatic firing
+    Brain.Screen.printAt(5, 25, automaticFiring ? "AUTO: ON" : "AUTO: OFF");
 
-    if(automaticFiring) {
-      cataWaitTime += 20;
-      //if switch is not pressed, prime the catapult
-       if(cata_switch.HIGH) {
-        if(cataWaitTime < cataMaxWaitTime) {
-          //keep waiting
-          left_cata_motor.setVelocity(0, percent);
-          right_cata_motor.setVelocity(0, percent);
+    int isSwitchPressed = !cata_switch.value();
+    if(isSwitchPressed) {
+      //if the limit switch is pressed, stop the cata (this means it is primed)
+      left_cata_motor.setVelocity(0, percent);
+      right_cata_motor.setVelocity(0, percent);
+
+      //if automatic firing is on, wait a certain amount of time then fire the cata
+      //This allows the placement of the triball
+      if(automaticFiring) {
+        //If it has been enough time, fire the cata, if not, keep waiting
+        if(cataWaitTime > cataMaxWaitTime) {
+          left_cata_motor.setVelocity(60, percent);
+          right_cata_motor.setVelocity(60, percent);
         } else {
-          //fire!!
-          left_cata_motor.setVelocity(100, percent);
-          right_cata_motor.setVelocity(100, percent);
+          cataWaitTime += 20;
         }
-      }
+      } 
+    } else {
+      //If the limit switch is not being pressed, prime the catapult
+      cataWaitTime = 0;
+      left_cata_motor.setVelocity(60, percent);
+      right_cata_motor.setVelocity(60, percent);
     }
 
     //if the robot is going backward, then we need to reverse the direction of the robot and swap the left and right section

@@ -11,7 +11,7 @@ brain  Brain;
 motor top_right_motor = motor(PORT20, ratio6_1, false);
 motor top_left_motor = motor(PORT11, ratio6_1, true);
 motor right_bottom_motor = motor(PORT16, ratio6_1, false);
-motor right_top_motor = motor(PORT19, ratio6_1, true);
+motor right_top_motor = motor(PORT19, ratio6_1, false);
 motor left_bottom_motor = motor(PORT12, ratio6_1, true);
 motor left_top_motor = motor(PORT15, ratio6_1, true);
 controller Controller1 = controller(primary);
