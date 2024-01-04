@@ -123,7 +123,7 @@ void usercontrol(void) {
   int lastSwitchTime = 0; //Backwards Switch time
   int lastPneumaticTime = 0; //Pneumatic switch time
   int lastCataBtnTime = 0; //last time cata button was pressed
-  int cataMaxWaitTime = 3000; //3 seconds
+  int cataMaxWaitTime = 1500; //3 seconds
   int cataWaitTime = 0;
 
   while (1) {
