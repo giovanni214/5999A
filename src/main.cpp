@@ -121,7 +121,7 @@ void moveRightSide(int speed) {
 //ability to change the orientation of the robot
 void moveRobotTankMode(int leftTread, int rightTread, bool isBackwards) {
   moveLeftSide(!isBackwards ? leftTread : rightTread * -1);
-  moveRightSide(!isBackwards ? rightTread : leftTread * -1)
+  moveRightSide(!isBackwards ? rightTread : leftTread * -1);
 }
 
 void moveRobotArcadeMode(int forwardValue, int turnValue) {
