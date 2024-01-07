@@ -95,6 +95,15 @@ void setupMotors (){
   left_cata_motor.spin(forward);
   right_cata_motor.spin(forward);
 
+  top_right_motor.setVelocity(0, percent);
+  top_left_motor.setVelocity(0, percent);
+  right_bottom_motor.setVelocity(0, percent);
+  right_top_motor.setVelocity(0, percent);
+  left_bottom_motor.setVelocity(0, percent);
+  left_top_motor.setVelocity(0, percent);
+  left_cata_motor.setVelocity(0, percent);
+  right_cata_motor.setVelocity(0, percent);
+
 }
 
 //This moves the robot with the right and left side, it is made as a function for the
@@ -132,16 +141,16 @@ void usercontrol(void) {
     int rightUpAndDown = Controller1.Axis2.position(percent);
 
     //Lower the speed to help with turning while keeping max speed
-    if(leftUpAndDown < 90 && leftUpAndDown > 20) {
-      leftUpAndDown -= 20;
-    } else if(leftUpAndDown < 0 && leftUpAndDown > -80) {
-      leftUpAndDown += 20;
-    }
-    if(rightUpAndDown < 90 && rightUpAndDown > 20) {
-      rightUpAndDown -= 20;
-    } else if(rightUpAndDown < 0 && rightUpAndDown > -80) {
-      rightUpAndDown += 20;
-    }
+    // if(leftUpAndDown < 90 && leftUpAndDown > 20) {
+    //   leftUpAndDown -= 20;
+    // } else if(leftUpAndDown < 0 && leftUpAndDown > -80) {
+    //   leftUpAndDown += 20;
+    // }
+    // if(rightUpAndDown < 90 && rightUpAndDown > 20) {
+    //   rightUpAndDown -= 20;
+    // } else if(rightUpAndDown < 0 && rightUpAndDown > -80) {
+    //   rightUpAndDown += 20;
+    // }
 
     //SWITCH Side
     //Check the the L2 button is being pressed, if so swap the isBackward from true --> false or false --> true
