@@ -121,6 +121,7 @@ void moveRobotTankMode(int leftSide, int rightSide) {
 }
   
 
+
 void usercontrol(void) {
   // User control code here, inside the loop
   setupMotors();
@@ -135,22 +136,12 @@ void usercontrol(void) {
   int cataMaxWaitTime = 1500; //3 seconds
   int cataWaitTime = 0;
 
+  char drivingMode[] = "TANK";
+
   while (1) {
     //Get the axis values in percent (-100% for down and 100% for up)
     int leftUpAndDown = Controller1.Axis3.position(percent);
     int rightUpAndDown = Controller1.Axis2.position(percent);
-
-    //Lower the speed to help with turning while keeping max speed
-    // if(leftUpAndDown < 90 && leftUpAndDown > 20) {
-    //   leftUpAndDown -= 20;
-    // } else if(leftUpAndDown < 0 && leftUpAndDown > -80) {
-    //   leftUpAndDown += 20;
-    // }
-    // if(rightUpAndDown < 90 && rightUpAndDown > 20) {
-    //   rightUpAndDown -= 20;
-    // } else if(rightUpAndDown < 0 && rightUpAndDown > -80) {
-    //   rightUpAndDown += 20;
-    // }
 
     //SWITCH Side
     //Check the the L2 button is being pressed, if so swap the isBackward from true --> false or false --> true
