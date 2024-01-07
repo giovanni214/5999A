@@ -143,7 +143,6 @@ void usercontrol(void) {
     int leftUpAndDown = Controller1.Axis3.position(percent);
     int rightUpAndDown = Controller1.Axis2.position(percent);
 
-    //SWITCH Side
     //Check the the L2 button is being pressed, if so swap the isBackward from true --> false or false --> true
     //We also check that is has been more than a second since the last switch
     //This prevents a bug of switching back and forth constantly
