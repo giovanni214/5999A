@@ -44,7 +44,7 @@ competition Competition;
 void pre_auton(void) {
   // Initializing Robot Configuration. DO NOT REMOVE!
   vexcodeInit();
-
+  setupMotors();
   // All activities that occur before the competition starts
   // Example: clearing encoders, setting servo positions, ...
 }
@@ -103,21 +103,29 @@ void setupMotors (){
   left_top_motor.setVelocity(0, percent);
   left_cata_motor.setVelocity(0, percent);
   right_cata_motor.setVelocity(0, percent);
+}
 
+void moveLeftSide(int speed) {
+  top_left_motor.setVelocity(speed, percent);
+  left_bottom_motor.setVelocity(speed, percent);
+  left_top_motor.setVelocity(speed, percent);
+}
+
+void moveRightSide(int speed) {
+  top_right_motor.setVelocity(speed, percent);
+  right_bottom_motor.setVelocity(speed, percent);
+  right_top_motor.setVelocity(speed, percent);
 }
 
 //This moves the robot with the right and left side, it is made as a function for the
 //ability to change the orientation of the robot
-void moveRobotTankMode(int leftSide, int rightSide) {
-  //These are the left side of the robot with the intake facing forward
-  top_left_motor.setVelocity(leftSide, percent);
-  left_bottom_motor.setVelocity(leftSide, percent);
-  left_top_motor.setVelocity(leftSide, percent);
-  
-  //These are the right side of the robot with the intake facing forward
-  top_right_motor.setVelocity(rightSide, percent);
-  right_bottom_motor.setVelocity(rightSide, percent);
-  right_top_motor.setVelocity(rightSide, percent);
+void moveRobotTankMode(int leftTread, int rightTread, bool isBackwards) {
+  moveLeftSide(!isBackwards ? leftTread : rightTread * -1);
+  moveRightSide(!isBackwards ? rightTread : leftTread * -1)
+}
+
+void moveRobotArcadeMode(int forwardValue, int turnValue) {
+
 }
   
 
@@ -140,8 +148,10 @@ void usercontrol(void) {
 
   while (1) {
     //Get the axis values in percent (-100% for down and 100% for up)
-    int leftUpAndDown = Controller1.Axis3.position(percent);
-    int rightUpAndDown = Controller1.Axis2.position(percent);
+    int leftJoystickVertical = Controller1.Axis3.position(percent);
+    int leftJoystickHorizontal = Controller1.Axis4.position(percent);
+    int rightJoystickVertical = Controller1.Axis2.position(percent);
+    int rightJoystickHorizontal = Controller1.Axis1.position(percent);
 
     //Check the the L2 button is being pressed, if so swap the isBackward from true --> false or false --> true
     //We also check that is has been more than a second since the last switch
@@ -192,17 +202,12 @@ void usercontrol(void) {
       right_cata_motor.setVelocity(60, percent);
     }
 
-    //if the robot is going backward, then we need to reverse the direction of the robot and swap the left and right section
-    if (isBackward) {
-      leftUpAndDown *= -1; //5 --> -5, -5 --> 5
-      rightUpAndDown *= -1;
-      moveRobotTankMode(rightUpAndDown, leftUpAndDown);
-    } else {
-      // // moving the robot normally
-      moveRobotTankMode(leftUpAndDown, rightUpAndDown);
-    }
 
-
+  if(drivingMode == "TANK") {
+    moveRobotTankMode(leftJoystickVertical, rightJoystickVertical, isBackward);
+  } else if(drivingMode == "ARCADE") {
+    
+  }
     //Debug to display the value of stuff
     Brain.Screen.clearScreen();
     Brain.Screen.printAt(5, 25, automaticFiring ? "AUTO FIRE: ON" : "AUTO FIRE: OFF");
