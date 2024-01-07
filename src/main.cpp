@@ -127,6 +127,10 @@ void moveRobotArcadeMode(int forwardValue, int turnValue) {
   
 }
   
+void newDebugLine(const char *text, int &pos) {
+  Brain.Screen.printAt(5, pos, text);
+  pos += 25; //prints at the next new line
+}
 
 
 void usercontrol(void) {
@@ -202,16 +206,17 @@ void usercontrol(void) {
     }
 
 
-  if(drivingMode == "TANK") {
+  if(strcmp(drivingMode, "TANK") == 0) {
     moveRobotTankMode(leftJoystickVertical, rightJoystickVertical, isBackward);
-  } else if(drivingMode == "ARCADE") {
+  } else if(strcmp(drivingMode, "ARCADE") == 0) {
     moveRobotArcadeMode(leftJoystickVertical, rightJoystickHorizontal);
   }
     //Debug to display the value of stuff
     Brain.Screen.clearScreen();
-    Brain.Screen.printAt(5, 25, automaticFiring ? "AUTO FIRE: ON" : "AUTO FIRE: OFF");
-    Brain.Screen.printAt(5, 50, isBackward ? "CONTROLS: REVERSED" : "CONTROLS: NORMAL");
-    Brain.Screen.printAt(5, 75, isPneumaticsOn ? "WINGS: ON" : "WINGS: OFF");
+    int position = 25;
+    newDebugLine(automaticFiring ? "AUTO FIRE: ON" : "AUTO FIRE: OFF", position);
+    newDebugLine(isBackward ? "CONTROLS: REVERSED" : "CONTROLS: NORMAL", position);
+    newDebugLine(isPneumaticsOn ? "WINGS: ON" : "WINGS: OFF", position);
 
     lastSwitchTime += 20;
     lastPneumaticTime += 20;
