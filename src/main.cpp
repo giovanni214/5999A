@@ -169,9 +169,6 @@ void usercontrol(void) {
       automaticFiring = !automaticFiring; //false --> true, true --> false
     }
 
-    //Debug to display the value of the automatic firing
-    Brain.Screen.printAt(5, 25, automaticFiring ? "AUTO: ON" : "AUTO: OFF");
-
     int isSwitchPressed = !cata_switch.value();
     if(isSwitchPressed) {
       //if the limit switch is pressed, stop the cata (this means it is primed)
@@ -205,6 +202,13 @@ void usercontrol(void) {
       // // moving the robot normally
       moveRobotTankMode(leftUpAndDown, rightUpAndDown);
     }
+
+
+    //Debug to display the value of stuff
+    Brain.Screen.clearScreen();
+    Brain.Screen.printAt(5, 25, automaticFiring ? "AUTO FIRE: ON" : "AUTO FIRE: OFF");
+    Brain.Screen.printAt(5, 50, isBackward ? "CONTROLS: REVERSED" : "CONTROLS: NORMAL");
+    Brain.Screen.printAt(5, 75, isPneumaticsOn ? "WINGS: ON" : "WINGS: OFF");
 
     lastSwitchTime += 20;
     lastPneumaticTime += 20;
