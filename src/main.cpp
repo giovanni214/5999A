@@ -125,7 +125,7 @@ void moveRobotTankMode(int leftTread, int rightTread, bool isBackwards) {
 }
 
 void moveRobotArcadeMode(int forwardValue, int turnValue) {
-
+  
 }
   
 
@@ -206,7 +206,7 @@ void usercontrol(void) {
   if(drivingMode == "TANK") {
     moveRobotTankMode(leftJoystickVertical, rightJoystickVertical, isBackward);
   } else if(drivingMode == "ARCADE") {
-    
+    moveRobotArcadeMode(leftJoystickVertical, rightJoystickHorizontal);
   }
     //Debug to display the value of stuff
     Brain.Screen.clearScreen();
