@@ -182,6 +182,7 @@ void usercontrol(void) {
     }
 
     int isSwitchPressed = !cata_switch.value();
+    int cataSpeed = 60; //in percent
     if(isSwitchPressed) {
       //if the limit switch is pressed, stop the cata (this means it is primed)
       left_cata_motor.setVelocity(0, percent);
@@ -192,8 +193,8 @@ void usercontrol(void) {
       if(automaticFiring) {
         //If it has been enough time, fire the cata, if not, keep waiting
         if(cataWaitTime > cataMaxWaitTime) {
-          left_cata_motor.setVelocity(60, percent);
-          right_cata_motor.setVelocity(60, percent);
+          left_cata_motor.setVelocity(cataSpeed, percent);
+          right_cata_motor.setVelocity(cataSpeed, percent);
         } else {
           cataWaitTime += 20;
         }
@@ -201,8 +202,8 @@ void usercontrol(void) {
     } else {
       //If the limit switch is not being pressed, prime the catapult
       cataWaitTime = 0;
-      left_cata_motor.setVelocity(60, percent);
-      right_cata_motor.setVelocity(60, percent);
+      left_cata_motor.setVelocity(cataSpeed, percent);
+      right_cata_motor.setVelocity(cataSpeed, percent);
     }
 
 
@@ -217,6 +218,7 @@ void usercontrol(void) {
     newDebugLine(automaticFiring ? "AUTO FIRE: ON" : "AUTO FIRE: OFF", position);
     newDebugLine(isBackward ? "CONTROLS: REVERSED" : "CONTROLS: NORMAL", position);
     newDebugLine(isPneumaticsOn ? "WINGS: ON" : "WINGS: OFF", position);
+    newDebugLine(isSwitchPressed ? "LIMIT SWITCH: PRESSED" : "LIMIT SWITCH: NOT PRESSED", position);
 
     lastSwitchTime += 20;
     lastPneumaticTime += 20;
