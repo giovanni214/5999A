@@ -139,11 +139,14 @@ void usercontrol(void) {
   bool isBackward = false; //checks if robot is facing backward to swap controls
   bool isPneumaticsOn = false; //checks if robot has switched pneumatics
   bool automaticFiring = false; //Tells it to turn on or off automatic firing
+  bool fireCata = false;
 
   int minSwitchTime = 600; //milliseconds, mininumum wait time for the next button press
-  int lastSwitchTime = 0; //Backwards Switch time
-  int lastPneumaticTime = 0; //Pneumatic switch time
-  int lastCataBtnTime = 0; //last time cata button was pressed
+  int lastSwitchTime = minSwitchTime; //Backwards Switch time
+  int lastPneumaticTime = minSwitchTime; //Pneumatic switch time
+  int lastCataBtnTime = minSwitchTime; //last time cata button was pressed
+  int lastCataFireTime = minSwitchTime; //last time fire button pressed
+
   int cataMaxWaitTime = 1500; //3 seconds
   int cataWaitTime = 0;
 
@@ -159,7 +162,7 @@ void usercontrol(void) {
     //Check the the L2 button is being pressed, if so swap the isBackward from true --> false or false --> true
     //We also check that is has been more than a second since the last switch
     //This prevents a bug of switching back and forth constantly
-    if(Controller1.ButtonL2.pressing() && lastSwitchTime > minSwitchTime) {
+    if(Controller1.ButtonL2.pressing() && lastSwitchTime >= minSwitchTime) {
       lastSwitchTime = 0;
       isBackward = !isBackward;
       Controller1.rumble("."); // "." is a short pulse while "-" are long
@@ -167,7 +170,7 @@ void usercontrol(void) {
 
     //WINGS
     //The same as the code above, but we check R2 and release both pneumatics
-    if(Controller1.ButtonR2.pressing() && lastPneumaticTime > minSwitchTime) {
+    if(Controller1.ButtonR2.pressing() && lastPneumaticTime >= minSwitchTime) {
       lastPneumaticTime = 0;
       isPneumaticsOn = !isPneumaticsOn;
       left_pneumatic.set(isPneumaticsOn);
@@ -175,33 +178,47 @@ void usercontrol(void) {
     }
 
     //Automatic Firing of catapult
-    if(Controller1.ButtonL1.pressing() && lastCataBtnTime > minSwitchTime) {
+    if(Controller1.ButtonL1.pressing() && lastCataBtnTime >= minSwitchTime) {
       lastCataBtnTime = 0;
       cataWaitTime = 0;
       automaticFiring = !automaticFiring; //false --> true, true --> false
     }
 
+    //Automatic Firing of catapult
+    if(Controller1.ButtonB.pressing() &&  lastCataFireTime >= minSwitchTime) {
+      lastCataFireTime = 0;
+      cataWaitTime = 0;
+      fireCata = true;
+    }
+
     int isSwitchPressed = !cata_switch.value();
-    int cataSpeed = 60; //in percent
+    int cataSpeed = 50; //in percent
     if(isSwitchPressed) {
       //if the limit switch is pressed, stop the cata (this means it is primed)
       left_cata_motor.setVelocity(0, percent);
       right_cata_motor.setVelocity(0, percent);
 
+      if(fireCata) {
+        left_cata_motor.setVelocity(cataSpeed, percent);
+        right_cata_motor.setVelocity(cataSpeed, percent);
+      }
+
       //if automatic firing is on, wait a certain amount of time then fire the cata
       //This allows the placement of the triball
       if(automaticFiring) {
         //If it has been enough time, fire the cata, if not, keep waiting
-        if(cataWaitTime > cataMaxWaitTime) {
+        if(cataWaitTime >= cataMaxWaitTime) {
           left_cata_motor.setVelocity(cataSpeed, percent);
           right_cata_motor.setVelocity(cataSpeed, percent);
         } else {
           cataWaitTime += 20;
         }
       } 
+
     } else {
       //If the limit switch is not being pressed, prime the catapult
       cataWaitTime = 0;
+      fireCata = false;
       left_cata_motor.setVelocity(cataSpeed, percent);
       right_cata_motor.setVelocity(cataSpeed, percent);
     }
@@ -223,6 +240,7 @@ void usercontrol(void) {
     lastSwitchTime += 20;
     lastPneumaticTime += 20;
     lastCataBtnTime += 20;
+    lastCataFireTime += 20;
     wait(20, msec); // Sleep the task for a short amount of time to
                     // prevent wasted resources.
   }
