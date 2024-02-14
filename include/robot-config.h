@@ -14,7 +14,8 @@ extern motor left_cata_motor;
 extern motor right_cata_motor;
 extern digital_out left_pneumatic;
 extern digital_out right_pneumatic;
-extern digital_in cata_switch;
+extern inertial robot_rotation;
+// extern vision kicker_vision_seneor;
 
 /**
  * Used to initialize code/tasks/devices added using tools in VEXcode Pro.
