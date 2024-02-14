@@ -7,7 +7,6 @@
 /*                                                                            */
 /*----------------------------------------------------------------------------*/
 #include "vex.h"
-
 // ---- START VEXCODE CONFIGURED DEVICES ----
 // Robot Configuration:
 // [Name]               [Type]        [Port(s)]
@@ -24,58 +23,13 @@
 // right_pneumatic      digital_out   C   
 // cata_switch          digital_in    A
 // ---- END VEXCODE CONFIGURED DEVICES ----
-#include <cmath>
 using namespace vex;
 
 competition Competition;
 
 // define your global instances of motors and other devices here
-
-/*---------------------------------------------------------------------------*/
-/*                          Pre-Autonomous Functions                         */
-/*                                                                           */
-/*  You may want to perform some actions before the competition starts.      */
-/*  Do them in the following function.  You must return from this function   */
-/*  or the autonomous and usercontrol tasks will not be started.  This       */
-/*  function is only called once after the V5 has been powered on and        */
-/*  not every time that the robot is disabled.                               */
-/*---------------------------------------------------------------------------*/
-
-void pre_auton(void) {
-  // Initializing Robot Configuration. DO NOT REMOVE!
-  vexcodeInit();
-  // All activities that occur before the competition starts
-  // Example: clearing encoders, setting servo positions, ...
-}
-
-/*---------------------------------------------------------------------------*/
-/*                                                                           */
-/*                              Autonomous Task                              */
-/*                                                                           */
-/*  This task is used to control your robot during the autonomous phase of   */
-/*  a VEX Competition.                                                       */
-/*                                                                           */
-/*  You must modify the code to add your own robot specific commands here.   */
-/*---------------------------------------------------------------------------*/
-
-void autonomous(void) {
-  // ..........................................................................
-  // Insert autonomous user code here.
-  // ..........................................................................
-}
-
-/*---------------------------------------------------------------------------*/
-/*                                                                           */
-/*                              User Control Task                            */
-/*                                                                           */
-/*  This task is used to control your robot during the user control phase of */
-/*  a VEX Competition.                                                       */
-/*                                                                           */
-/*  You must modify the code to add your own robot specific commands here.   */
-/*---------------------------------------------------------------------------*/
-
 //This code sets up the motors for driving, the second half gives the motors ability to spin
-void setupMotors (){
+void setupMotors () {
   top_right_motor.setStopping(coast);
   top_left_motor.setStopping(coast);
   right_bottom_motor.setStopping(coast);
@@ -104,6 +58,23 @@ void setupMotors (){
   right_cata_motor.setVelocity(0, percent);
 }
 
+/*---------------------------------------------------------------------------*/
+/*                          Pre-Autonomous Functions                         */
+/*                                                                           */
+/*  You may want to perform some actions before the competition starts.      */
+/*  Do them in the following function.  You must return from this function   */
+/*  or the autonomous and usercontrol tasks will not be started.  This       */
+/*  function is only called once after the V5 has been powered on and        */
+/*  not every time that the robot is disabled.                               */
+/*---------------------------------------------------------------------------*/
+
+void pre_auton(void) {
+  // Initializing Robot Configuration. DO NOT REMOVE!
+  vexcodeInit();
+  
+  // All activities that occur before the competition starts
+}
+
 void moveLeftSide(int speed) {
   top_left_motor.setVelocity(speed, percent);
   left_bottom_motor.setVelocity(speed, percent);
@@ -123,124 +94,211 @@ void moveRobotTankMode(int leftTread, int rightTread, bool isBackwards) {
   moveRightSide(!isBackwards ? rightTread : leftTread * -1);
 }
 
+//may create in the future
 void moveRobotArcadeMode(int forwardValue, int turnValue) {
   
 }
+
+void stopRobot(int time) {
+  wait(time, msec);
+  moveRobotTankMode(0, 0, false);
+}
+
+/*---------------------------------------------------------------------------*/
+/*                                                                           */
+/*                              Autonomous Task                              */
+/*                                                                           */
+/*  This task is used to control your robot during the autonomous phase of   */
+/*  a VEX Competition.                                                       */
+/*                                                                           */
+/*  You must modify the code to add your own robot specific commands here.   */
+/*---------------------------------------------------------------------------*/
+
+void autonomous(void) {
+  setupMotors();
   
+  //far side auton
+  moveRobotTankMode(50, 50, true); //back up to release sick
+  stopRobot(70);
+
+  moveRobotTankMode(90, -90, false); //turn to push triball in
+  stopRobot(130);
+
+  moveRobotTankMode(100, 100, false);
+  stopRobot(700);
+
+  stopRobot(1000); //wait one second
+
+  moveRobotTankMode(30, 20, true);
+  stopRobot(800);
+
+  stopRobot(1000); //wait one second
+
+  moveRobotTankMode(-50, 50, true);
+  stopRobot(500);
+
+  stopRobot(1000); //wait one second
+  
+  moveRobotTankMode(100, 100, true);
+  stopRobot(1000);
+
+  // //close side
+  // moveRobotTankMode(50, 50, true); //back up to release sick
+  // stopRobot(70);
+
+  // moveRobotTankMode(100, 100, false); //back up from wall
+  // stopRobot(400);
+
+  // moveRobotTankMode(100, -100, true); //turn to face corner
+  // stopRobot(200);
+
+  // moveRobotTankMode(100, 100, true); //move towards corner
+  // stopRobot(300);
+
+  // moveRobotTankMode(-100, 100, true); //hit triball
+  // stopRobot(500);
+
+
+
+}
+
+/*---------------------------------------------------------------------------*/
+/*                                                                           */
+/*                              User Control Task                            */
+/*                                                                           */
+/*  This task is used to control your robot during the user control phase of */
+/*  a VEX Competition.                                                       */
+/*                                                                           */
+/*  You must modify the code to add your own robot specific commands here.   */
+/*---------------------------------------------------------------------------*/
+
+
+
 void newDebugLine(const char *text, int &pos) {
   Brain.Screen.printAt(5, pos, text);
   pos += 25; //prints at the next new line
 }
 
+double keepTurning(double desiredAngle, double actualAngle) {
+  double kP = 0.8;
+  double changeInAngle = desiredAngle - actualAngle;
+  if(changeInAngle < 1 && changeInAngle > -1) {
+    return 0;
+  }
+
+  double motorSpeed = kP * (changeInAngle);
+  return motorSpeed;
+}
 
 void usercontrol(void) {
   // User control code here, inside the loop
   setupMotors();
+  robot_rotation.calibrate();
+  robot_rotation.setRotation(0, degrees);
+  while(robot_rotation.isCalibrating()) {
+   wait(100, msec);
+  }
+  
   bool isBackward = false; //checks if robot is facing backward to swap controls
-  bool isPneumaticsOn = false; //checks if robot has switched pneumatics
-  bool automaticFiring = false; //Tells it to turn on or off automatic firing
-  bool fireCata = false;
+  bool leftPneumaticsOn = false; //checks if robot has switched pneumatics on or off
+  bool rightPneumaticsOn = false; //checks if robot has switched pneumatics on or off
+  bool firePuncher = false; //Tells it to turn on or off puncher
 
   int minSwitchTime = 600; //milliseconds, mininumum wait time for the next button press
   int lastSwitchTime = minSwitchTime; //Backwards Switch time
-  int lastPneumaticTime = minSwitchTime; //Pneumatic switch time
-  int lastCataBtnTime = minSwitchTime; //last time cata button was pressed
-  int lastCataFireTime = minSwitchTime; //last time fire button pressed
+  int leftPneumaticTime = minSwitchTime; //left pneumatic switch time
+  int rightPneumaticTime = minSwitchTime; //right pneumatic switch time
+  int lastUpTime = minSwitchTime; //Up button press switching time
+  int lastDownTime = minSwitchTime; //Down button press switching time
+  int lastCataBtnTime = minSwitchTime; //The last time the button was pressed
 
-  int cataMaxWaitTime = 1500; //3 seconds
-  int cataWaitTime = 0;
-
+  int cataSpeed = 50; //in percent
   char drivingMode[] = "TANK";
-
+   
   while (1) {
     //Get the axis values in percent (-100% for down and 100% for up)
     int leftJoystickVertical = Controller1.Axis3.position(percent);
-    int leftJoystickHorizontal = Controller1.Axis4.position(percent);
     int rightJoystickVertical = Controller1.Axis2.position(percent);
-    int rightJoystickHorizontal = Controller1.Axis1.position(percent);
 
-    //Check the the L2 button is being pressed, if so swap the isBackward from true --> false or false --> true
-    //We also check that is has been more than a second since the last switch
-    //This prevents a bug of switching back and forth constantly
-    if(Controller1.ButtonL2.pressing() && lastSwitchTime >= minSwitchTime) {
+    //Reverse Controls
+    if(Controller1.ButtonL1.pressing() && lastSwitchTime >= minSwitchTime) {
       lastSwitchTime = 0;
       isBackward = !isBackward;
       Controller1.rumble("."); // "." is a short pulse while "-" are long
     }
 
-    //WINGS
-    //The same as the code above, but we check R2 and release both pneumatics
-    if(Controller1.ButtonR2.pressing() && lastPneumaticTime >= minSwitchTime) {
-      lastPneumaticTime = 0;
-      isPneumaticsOn = !isPneumaticsOn;
-      left_pneumatic.set(isPneumaticsOn);
-      right_pneumatic.set(isPneumaticsOn);
+    //LEFT SIDE WINGS
+    //The same as the code above, but we check L2 and release left side pneumatics
+    if(Controller1.ButtonL2.pressing() && leftPneumaticTime >= minSwitchTime) {
+      leftPneumaticTime = 0;
+      leftPneumaticsOn = !leftPneumaticsOn;
+      left_pneumatic.set(leftPneumaticsOn);
+    }
+
+    //RIGHT SIDE WINGS
+    //The same as the code above, but we check R2 and release right side pneumatics
+    if(Controller1.ButtonR2.pressing() && rightPneumaticTime >= minSwitchTime) {
+      rightPneumaticTime = 0;
+      // rightPneumaticsOn = !rightPneumaticsOn;
+      // right_pneumatic.set(rightPneumaticsOn);
+      // double turnValue = keepTurning(90, robot_rotation.rotation());
     }
 
     //Automatic Firing of catapult
-    if(Controller1.ButtonL1.pressing() && lastCataBtnTime >= minSwitchTime) {
+    if(Controller1.ButtonR1.pressing() && lastCataBtnTime >= minSwitchTime) {
       lastCataBtnTime = 0;
-      cataWaitTime = 0;
-      automaticFiring = !automaticFiring; //false --> true, true --> false
+      firePuncher = !firePuncher; //false --> true, true --> false
+      Controller1.rumble("-"); // "." is a short pulse while "-" are long
     }
 
-    //Automatic Firing of catapult
-    if(Controller1.ButtonB.pressing() &&  lastCataFireTime >= minSwitchTime) {
-      lastCataFireTime = 0;
-      cataWaitTime = 0;
-      fireCata = true;
+    //Lower or raise the sped of the catapult
+    if(Controller1.ButtonUp.pressing() && lastUpTime >= minSwitchTime) {
+      lastUpTime = 0;
+      cataSpeed += 5;
+      if(cataSpeed > 100) {
+        cataSpeed = 100;
+      }
     }
 
-    int isSwitchPressed = !cata_switch.value();
-    int cataSpeed = 50; //in percent
-    if(isSwitchPressed) {
-      //if the limit switch is pressed, stop the cata (this means it is primed)
+    if(Controller1.ButtonDown.pressing() && lastDownTime >= minSwitchTime) {
+      lastDownTime = 0;
+       cataSpeed -= 15;
+      if(cataSpeed < 40) {
+        cataSpeed = 40;
+      }
+    }
+
+    if(firePuncher) {
+      left_cata_motor.setVelocity(cataSpeed, percent);
+      right_cata_motor.setVelocity(cataSpeed, percent);
+    } else {
       left_cata_motor.setVelocity(0, percent);
       right_cata_motor.setVelocity(0, percent);
 
-      if(fireCata) {
-        left_cata_motor.setVelocity(cataSpeed, percent);
-        right_cata_motor.setVelocity(cataSpeed, percent);
-      }
-
-      //if automatic firing is on, wait a certain amount of time then fire the cata
-      //This allows the placement of the triball
-      if(automaticFiring) {
-        //If it has been enough time, fire the cata, if not, keep waiting
-        if(cataWaitTime >= cataMaxWaitTime) {
-          left_cata_motor.setVelocity(cataSpeed, percent);
-          right_cata_motor.setVelocity(cataSpeed, percent);
-        } else {
-          cataWaitTime += 20;
-        }
-      } 
-
-    } else {
-      //If the limit switch is not being pressed, prime the catapult
-      cataWaitTime = 0;
-      fireCata = false;
-      left_cata_motor.setVelocity(cataSpeed, percent);
-      right_cata_motor.setVelocity(cataSpeed, percent);
     }
 
+    if(strcmp(drivingMode, "TANK") == 0) {
+      moveRobotTankMode(leftJoystickVertical, rightJoystickVertical, isBackward);
+    }
 
-  if(strcmp(drivingMode, "TANK") == 0) {
-    moveRobotTankMode(leftJoystickVertical, rightJoystickVertical, isBackward);
-  } else if(strcmp(drivingMode, "ARCADE") == 0) {
-    moveRobotArcadeMode(leftJoystickVertical, rightJoystickHorizontal);
-  }
     //Debug to display the value of stuff
     Brain.Screen.clearScreen();
     int position = 25;
-    newDebugLine(automaticFiring ? "AUTO FIRE: ON" : "AUTO FIRE: OFF", position);
     newDebugLine(isBackward ? "CONTROLS: REVERSED" : "CONTROLS: NORMAL", position);
-    newDebugLine(isPneumaticsOn ? "WINGS: ON" : "WINGS: OFF", position);
-    newDebugLine(isSwitchPressed ? "LIMIT SWITCH: PRESSED" : "LIMIT SWITCH: NOT PRESSED", position);
+    newDebugLine(leftPneumaticsOn ? "LEFT WINGS: ON" : "LEFT WINGS: OFF", position);
+    newDebugLine(rightPneumaticsOn ? "RIGHT WINGS: ON" : "RIGHT WINGS: OFF", position);
+    
+    char buffer[32];
+    snprintf(buffer, sizeof(buffer), "%g", robot_rotation.rotation());
+    newDebugLine(buffer, position);
 
-    lastSwitchTime += 20;
-    lastPneumaticTime += 20;
+    //Add 20 milleseconds of wait time
     lastCataBtnTime += 20;
-    lastCataFireTime += 20;
+    lastSwitchTime += 20;
+    leftPneumaticTime += 20;
+    rightPneumaticTime += 20;
+    lastUpTime += 20;
+    lastDownTime += 20;
     wait(20, msec); // Sleep the task for a short amount of time to
                     // prevent wasted resources.
   }
